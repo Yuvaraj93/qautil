@@ -1,0 +1,234 @@
+import tkinter as tk
+from tkinter import ttk, messagebox, scrolledtext
+
+class QAUtilitiesApp:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Launch QA Utilities")
+        self.root.geometry("900x700")
+        self.root.configure(bg="#ADD8E6")  # Light blue background for the main window
+
+        # Create the menu bar
+        self.menu_bar = tk.Menu(self.root)
+        self.root.config(menu=self.menu_bar)
+
+        # "Launch QA Utilities" top-level menu
+        self.launch_qa_menu = tk.Menu(self.menu_bar, tearoff=0)
+        self.menu_bar.add_cascade(label="Launch QA Utilities", menu=self.launch_qa_menu)
+        self.launch_qa_menu.add_command(label="Test Database Menu", command=self.test_database_menu)
+        self.launch_qa_menu.add_command(label="BPI-RunProcessMenu", command=self.bpi_run_process)
+        self.launch_qa_menu.add_command(label="BW Reset Password", command=self.bw_reset_password)
+        self.launch_qa_menu.add_command(label="Quick Merchant Find", command=self.quick_merchant_find)
+        self.launch_qa_menu.add_command(label="Transaction Charges Checker", command=self.transaction_charges_checker)
+        self.launch_qa_menu.add_command(label="OMNIPAY - MC Simulator", command=self.omnipay_mc_simulator)
+        self.launch_qa_menu.add_command(label="OMNIPAY - Visa Simulator", command=self.omnipay_visa_simulator)
+        self.launch_qa_menu.add_separator()
+        self.launch_qa_menu.add_command(label="Exit", command=self.exit_app)
+
+        # Create a Notebook (tabbed interface)
+        self.notebook = ttk.Notebook(self.root)
+        self.notebook.pack(pady=10, expand=True, fill="both")
+
+        # Tabs
+        self.tab1 = ttk.Frame(self.notebook, style="Blue.TFrame")
+        self.notebook.add(self.tab1, text="Update 80Byte Batch")
+        self.setup_update_batch_tab()
+
+        self.tab2 = ttk.Frame(self.notebook, style="Blue.TFrame")
+        self.notebook.add(self.tab2, text="Generate Cards")
+        self.setup_generate_cards_tab()
+
+        self.tab3 = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab3, text="Scheme Testing")
+
+        self.tab4 = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab4, text="IPM-CSV")
+
+        self.tab5 = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab5, text="Reset RAM pwd")
+
+        self.tab6 = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab6, text="Add Card Bin")
+
+        self.tab7 = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab7, text="Being nice")
+
+        # Add Unix Executor Tab
+        self.tab8 = ttk.Frame(self.notebook)
+        self.notebook.add(self.tab8, text="Unix Executor")
+        self.setup_unix_executor_tab()
+
+        # Toolbar frame for buttons
+        self.toolbar = tk.Frame(self.root, bg="#ADD8E6")
+        self.toolbar.pack(side=tk.TOP, fill=tk.X, padx=5, pady=5)
+
+        # Toolbar buttons
+        self.replace_btn = tk.Button(self.toolbar, text="Replace", command=self.replace_action)
+        self.replace_btn.pack(side=tk.LEFT, padx=2)
+
+        self.delete_btn = tk.Button(self.toolbar, text="Delete", command=self.delete_action)
+        self.delete_btn.pack(side=tk.LEFT, padx=2)
+
+        self.copy_btn = tk.Button(self.toolbar, text="Copy", command=self.copy_action)
+        self.copy_btn.pack(side=tk.LEFT, padx=2)
+
+        self.save_btn = tk.Button(self.toolbar, text="Save", command=self.save_action)
+        self.save_btn.pack(side=tk.LEFT, padx=2)
+
+        self.download_btn = tk.Button(self.toolbar, text="Download", command=self.download_action)
+        self.download_btn.pack(side=tk.LEFT, padx=2)
+
+    def setup_update_batch_tab(self):
+        """Setup the Update 80Byte Batch tab."""
+        frame = ttk.Frame(self.tab1, padding=10, style="Blue.TFrame")
+        frame.pack(fill=tk.BOTH, expand=True)
+
+        ttk.Label(frame, text="1. Drag and Drop an 80Byte File or Folder onto this window.\n"
+                              "2. Click Process 80Byte.\n"
+                              "3. New File created.").pack(pady=10)
+
+        self.update_ref_var = tk.BooleanVar()
+        ttk.Checkbutton(frame, text="Update Our Reference", variable=self.update_ref_var).pack(pady=5)
+
+        ttk.Button(frame, text="Process 80Byte", command=self.process_80byte).pack(pady=10)
+
+    def setup_generate_cards_tab(self):
+        """Setup the Generate Cards tab."""
+        frame = ttk.Frame(self.tab2, padding=10, style="Blue.TFrame")
+        frame.pack(fill=tk.BOTH, expand=True)
+
+        # Card BIN
+        ttk.Label(frame, text="Card BIN:").grid(row=0, column=0, sticky=tk.W, padx=5, pady=5)
+        self.card_bin_entry = ttk.Entry(frame)
+        self.card_bin_entry.grid(row=0, column=1, padx=5, pady=5)
+
+        # Card Length
+        ttk.Label(frame, text="Card Length:").grid(row=1, column=0, sticky=tk.W, padx=5, pady=5)
+        self.card_length_entry = ttk.Entry(frame)
+        self.card_length_entry.grid(row=1, column=1, padx=5, pady=5)
+        self.card_length_entry.insert(0, "16")  # Default value
+
+        # No. of Cards
+        ttk.Label(frame, text="No. of Cards:").grid(row=2, column=0, sticky=tk.W, padx=5, pady=5)
+        self.num_cards_entry = ttk.Entry(frame)
+        self.num_cards_entry.grid(row=2, column=1, padx=5, pady=5)
+
+        # Voltage Encrypt Checkbox
+        self.voltage_encrypt_var = tk.BooleanVar()
+        self.voltage_encrypt_check = ttk.Checkbutton(frame, text="Voltage Encrypt", variable=self.voltage_encrypt_var)
+        self.voltage_encrypt_check.grid(row=3, column=0, columnspan=2, pady=5)
+
+        # Generate Cards Button
+        ttk.Button(frame, text="Generate Cards", command=self.generate_cards).grid(row=4, column=0, columnspan=2, pady=10)
+
+    def setup_unix_executor_tab(self):
+        """Setup the Unix Executor tab."""
+        frame = ttk.Frame(self.tab8, padding=10)
+        frame.pack(fill=tk.BOTH, expand=True)
+
+        ttk.Label(frame, text="Unix Executor", font=("Arial", 14, "bold")).pack(pady=10)
+
+        ttk.Label(frame, text="Hostname:").pack(anchor="w", padx=5, pady=2)
+        self.hostname_entry = ttk.Entry(frame)
+        self.hostname_entry.pack(fill=tk.X, padx=5, pady=2)
+
+        ttk.Label(frame, text="Port:").pack(anchor="w", padx=5, pady=2)
+        self.port_entry = ttk.Entry(frame)
+        self.port_entry.pack(fill=tk.X, padx=5, pady=2)
+
+        ttk.Label(frame, text="Username:").pack(anchor="w", padx=5, pady=2)
+        self.username_entry = ttk.Entry(frame)
+        self.username_entry.pack(fill=tk.X, padx=5, pady=2)
+
+        ttk.Label(frame, text="Password:").pack(anchor="w", padx=5, pady=2)
+        self.password_entry = ttk.Entry(frame, show="*")
+        self.password_entry.pack(fill=tk.X, padx=5, pady=2)
+
+        ttk.Button(frame, text="Connect", command=self.connect_to_unix_server).pack(pady=10)
+
+    def connect_to_unix_server(self):
+        """Connect to the Unix server."""
+        hostname = self.hostname_entry.get()
+        port = self.port_entry.get()
+        username = self.username_entry.get()
+        password = self.password_entry.get()
+
+        if not hostname or not port or not username or not password:
+            messagebox.showerror("Error", "All fields are required to connect to the Unix server.")
+            return
+
+        messagebox.showinfo("Info", f"Connecting to Unix server at {hostname}:{port} as {username}...")
+
+    def process_80byte(self):
+        """Process 80Byte file or folder."""
+        update_ref = self.update_ref_var.get()
+        messagebox.showinfo("Info", f"Processing 80Byte...\nUpdate Our Reference: {update_ref}")
+
+    def generate_cards(self):
+        """Generate cards based on user input."""
+        card_bin = self.card_bin_entry.get()
+        card_length = self.card_length_entry.get()
+        num_cards = self.num_cards_entry.get()
+        voltage_encrypt = self.voltage_encrypt_var.get()
+
+        if not card_bin or not card_length or not num_cards:
+            messagebox.showerror("Error", "Please fill in all fields.")
+            return
+
+        try:
+            num_cards = int(num_cards)
+            card_length = int(card_length)
+        except ValueError:
+            messagebox.showerror("Error", "Card Length and No. of Cards must be integers.")
+            return
+
+        messagebox.showinfo("Info", f"Cards generated successfully!\nCard BIN: {card_bin}\nCard Length: {card_length}\n"
+                                    f"No. of Cards: {num_cards}\nVoltage Encrypt: {voltage_encrypt}")
+
+    def test_database_menu(self):
+        messagebox.showinfo("Info", "Test Database Menu clicked")
+
+    def bpi_run_process(self):
+        messagebox.showinfo("Info", "BPI-RunProcessMenu clicked")
+
+    def bw_reset_password(self):
+        messagebox.showinfo("Info", "BW Reset Password clicked")
+
+    def quick_merchant_find(self):
+        messagebox.showinfo("Info", "Quick Merchant Find clicked")
+
+    def transaction_charges_checker(self):
+        messagebox.showinfo("Info", "Transaction Charges Checker clicked")
+
+    def omnipay_mc_simulator(self):
+        messagebox.showinfo("Info", "OMNIPAY - MC Simulator clicked")
+
+    def omnipay_visa_simulator(self):
+        messagebox.showinfo("Info", "OMNIPAY - Visa Simulator clicked")
+
+    def exit_app(self):
+        self.root.quit()
+
+    # Toolbar button actions (placeholders)
+    def replace_action(self):
+        messagebox.showinfo("Info", "Replace action triggered!")
+
+    def delete_action(self):
+        messagebox.showinfo("Info", "Delete action triggered!")
+
+    def copy_action(self):
+        messagebox.showinfo("Info", "Copy action triggered!")
+
+    def save_action(self):
+        messagebox.showinfo("Info", "Save action triggered!")
+
+    def download_action(self):
+        messagebox.showinfo("Info", "Download action triggered!")
+
+def main():
+    root = tk.Tk()
+    app = QAUtilitiesApp(root)
+    root.mainloop()
+
+if __name__ == "__main__":
+    main()
